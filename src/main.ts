@@ -27,9 +27,9 @@ export interface BuildTask {
 }
 
 const REPOS = [
-  "hertzg/rtl433",
-  "hertzg/rtl_433",
-  "ghcr.io/hertzg/rtl_433_docker",
+  "hockeymikey/rtl433",
+  "hockeymikey/rtl_433",
+  "ghcr.io/hockeymikey/rtl_433_docker",
 ];
 
 const tags: string[] = ["master"];
