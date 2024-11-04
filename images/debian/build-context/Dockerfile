@@ -9,17 +9,11 @@ RUN apt-get update && apt-get install -y \
     libusb-1.0-0-dev \
     libsoapysdr-dev \
     libssl-dev \
+    librtlsdr-dev \
+    dpkg \
+    dpkg-dev \
     pkg-config \
  && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /rtl-sdr
-RUN git clone https://github.com/rtlsdrblog/rtl-sdr-blog && \
-    cd rtl-sdr-blog && \
-    dpkg-buildpackage -b --no-sign && \
-    cd .. && \
-    rm -rf rtl-sdr-blog && \
-    dpkg -i librtlsdr0_*.deb && \
-    dpkg -i librtlsdr-dev_*.deb
 
 WORKDIR /build
 
@@ -37,20 +31,41 @@ ARG debianVersion=latest
 FROM debian:${debianVersion}
 
 ARG rtl433GitRevision=master
-LABEL maintainer="georgedot@gmail.com" \
+LABEL maintainer="hockeymikey@hockeymikey.com" \
     vcs-ref="${rtl433GitRevision}"
-
+    
 RUN apt-get update && apt-get install -y \
     libusb-1.0-0 \
+#    librtlsdr0 \
     '^libsoapysdr0\.[6-8]$' \
     '^libssl(1\.1|3)$' \
     '^soapysdr0\.[6-8]-module-all$' \
+    debhelper \
+    dpkg \
+    dpkg-dev \
+    pkg-config \
+    build-essential \
+    cmake \
+    git \
+    libusb-1.0-0-dev \
  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /rtl-sdr/librtlsdr0_*.deb /tmp/
 RUN dpkg -i /tmp/librtlsdr0_*.deb && \
     rm -rf /tmp/librtlsdr0_*.deb
 
+# Add rtl-sdr-blog
+RUN git clone https://github.com/rtlsdrblog/rtl-sdr-blog
+WORKDIR /build/rtl-sdr-blog
+RUN dpkg-buildpackage -b --no-sign
+WORKDIR ..
+
+# Install rtl-sdr-blog
+RUN rm *.changes
+RUN rm *.buildinfo
+RUN dpkg -i librtlsdr0_*
+RUN dpkg -i librtlsdr-dev_*
+RUN dpkg -i rtl-sdr_*
 
 WORKDIR /root
 COPY --from=builder /build/root/ /
