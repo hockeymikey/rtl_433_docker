@@ -50,9 +50,7 @@ RUN apt-get update && apt-get install -y \
     libusb-1.0-0-dev \
  && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /rtl-sdr/librtlsdr0_*.deb /tmp/
-RUN dpkg -i /tmp/librtlsdr0_*.deb && \
-    rm -rf /tmp/librtlsdr0_*.deb
+WORKDIR /build
 
 # Add rtl-sdr-blog
 RUN git clone https://github.com/rtlsdrblog/rtl-sdr-blog
